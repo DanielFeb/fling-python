@@ -1,0 +1,9 @@
+{
+  "log": {
+    "backupCount": 2,
+    "when": "M",
+    "console": {
+      "enabled": true
+    }
+  }
+}

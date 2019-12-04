@@ -1,21 +1,26 @@
 import os
 from logging.config import dictConfig
 
-
-def make_dir(path):
-    if os.path.exists(path):
-        pass
-    else:
-        os.makedirs(path)
+from config import base
 
 
 def enable():
-    filedir = os.path.abspath(os.path.dirname(__file__))
-    basedir = os.path.abspath(os.path.dirname(filedir))
-    logdir = "{0}/logs/".format(basedir)
-    logfile = "{0}flask.log".format(logdir)
+    log_configuration = base.log_configuration()
 
-    make_dir(logdir)
+    filename = log_configuration.get_optional_property_with_default('filename', 'mylog')
+    log_level = log_configuration.get_optional_property_with_default('level', 'DEBUG')
+    when = log_configuration.get_optional_property_with_default('when', 'D')
+    interval = log_configuration.get_optional_property_with_default('interval', 1)
+    backup_count = log_configuration.get_optional_property_with_default('backupCount', 0)
+    console_enabled = log_configuration.get_optional_property_with_default('console.enabled', False)
+    log_dir = base.add_work_dir_prefix('logs')
+    logfile = base.append_path(log_dir, '{0}.log'.format(filename))
+
+    base.make_dir_if_not_exist(log_dir)
+
+    handlers = ['file']
+    if console_enabled:
+        handlers.append('wsgi')
 
     dictConfig({
         'version': 1,
@@ -29,14 +34,14 @@ def enable():
         }, 'file': {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': logfile,
-            'level': 'DEBUG',
-            'when': 'M',
-            'interval': 1,
-            'backupCount': 0,
+            'level': log_level,
+            'when': when,
+            'interval': interval,
+            'backupCount': backup_count,
             'formatter': 'default'
         }},
         'root': {
             'level': 'INFO',
-            'handlers': ['wsgi', 'file']
+            'handlers': handlers
         }
     })

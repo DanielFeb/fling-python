@@ -1,0 +1,10 @@
+{
+  "profile": {
+    "active": "dev"
+  },
+  "log": {
+    "filename": "flask_log",
+    "level": "DEBUG",
+    "backupCount": 10
+  }
+}

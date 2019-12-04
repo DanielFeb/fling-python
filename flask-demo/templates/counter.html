@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    ul{
+        text-align: left;
+        margin-left: 10px;
+        list-style-type: none;
+    }
+    body{
+        text-align: center;
+    }
+    #show, #bottom{
+        width: 600px;
+        background-color: azure;
+        padding: 15px
+    }
+    #show{
+        height: 400px;
+    }
+    #bottom{
+        height: 30px;
+    }
+    input{
+        width: 520px;
+    }
+</style>
+<body>
+<div id="show">
+    <ul>
+
+    </ul>
+</div>
+<div id="bottom">
+    <button id="connect">连接</button><button id="close">关闭</button>
+    <button id="stop">暂停</button><button id="continue">继续</button>
+    <button id="clear">清理</button>
+</div>
+</body>
+<script src="/static/js/jquery.js"></script>  <!--jquery请自行百度下载-->
+<script src="/static/js/socket.io.js"></script>  <!--socket.io.js请自行百度下载-->
+<script>
+    $(function(){
+        var io_client = null;
+        var isConnected = function() {
+            if (!io_client) {
+                $("#show ul").append(`<li>not connection</li>`);
+                return false;
+            }
+            return true;
+
+        };
+
+        // 连接按钮事件
+        $("#connect").click(function(){
+            if(io_client) {
+                $("#show ul").append(`<li>already connectted</li>`);
+                return;
+            }
+            var url = "http://" + document.domain + ':' + location.port;
+            console.log(url);
+            io_client = io.connect(url);
+            io_client.on('connect', function() {
+
+                $("#show ul").append(`<li>start connection</li>`);
+                io_client.emit('start', {data: 0});
+            });
+
+            io_client.on("message", function(resp){
+                $("#show ul").append(`<li>message: ${resp}</li>`);
+            });
+
+            io_client.on("mes", function(resp){
+                $("#show ul").append(`<li>mes: ${resp}</li>`);
+            });
+            io_client.on("disconnect", function(resp){
+                $("#show ul").append(`<li>close connection</li>`);
+            });
+        });
+        $("#stop").click(function(){
+            if(isConnected()) {
+                io_client.emit("stop", {data: 0});
+            }
+        });
+        $("#continue").click(function(){
+            if(isConnected()) {
+                io_client.emit("continue", {data: 0});
+            }
+        });
+        $("#close").click(function(){
+            if(isConnected()) {
+                io_client.close();
+                io_client = null;
+            }
+        });
+        $("#clear").click(function(){
+            $("#show ul li").remove();
+        });
+    });
+</script>
+</html>

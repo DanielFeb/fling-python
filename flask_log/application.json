@@ -6,5 +6,8 @@
     "filename": "flask_log",
     "level": "DEBUG",
     "backupCount": 10
+  },
+  "executor": {
+    "queue_size": 10
   }
 }

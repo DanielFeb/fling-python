@@ -41,7 +41,7 @@ def enable():
             'formatter': 'default'
         }},
         'root': {
-            'level': 'INFO',
+            'level': log_level,
             'handlers': handlers
         }
     })

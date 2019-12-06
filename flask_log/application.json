@@ -8,6 +8,8 @@
     "backupCount": 10
   },
   "executor": {
-    "queue_size": 10
+    "queue_size": 10,
+    "concurrent_count": 3,
+    "timeout": 6
   }
 }

@@ -7,6 +7,12 @@ class Configuration:
         super().__init__()
         self.config = config_dict
 
+    def get(self, name, default=None):
+        if default is None:
+            return self.get_not_none_property(name)
+        else:
+            return self.get_optional_property_with_default(name, default)
+
     def get_config_recursively(self, name):
         names = name.split(".")
         current_dict = self.config

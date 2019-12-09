@@ -30,7 +30,7 @@ class SingleThreadExecutor():
 
     @staticmethod
     def exit_task(args_dict):
-        logging.info("Executor's Final Mission complete success!")
+        logging.info("SingleThreadExecutor's Final Mission complete success!")
 
     def execute(self, task):
         task.pre_process()
@@ -73,6 +73,10 @@ class MultiThreadExecutor(SingleThreadExecutor):
             self.task_queue.put(Task(self.exit_task, unique_key="Final-Mission"), block=False)
 
     @staticmethod
+    def exit_task(args_dict):
+        logging.info("MultiThreadExecutor's Final Mission complete success!")
+
+    @staticmethod
     def do_start(executor):
         threads = []
         for i in range(executor.max_concurrent_count):
@@ -105,3 +109,21 @@ class MultiProcessExecutor(MultiThreadExecutor):
             p.terminate()
         finally:
             p.terminate()
+
+    @staticmethod
+    def exit_task(args_dict):
+        logging.info("MultiProcessExecutor's Final Mission complete success!")
+
+
+class ProcessPoolExecutor(MultiThreadExecutor):
+    def __init__(self, queue_size=0, max_concurrent_count=1) -> None:
+        super().__init__(queue_size, max_concurrent_count)
+        self._pool = Pool(max_concurrent_count)
+
+    def execute(self, task):
+        task.pre_process()
+        self._pool.apply(task.get_func(), task.get_argument_tuple())
+
+    @staticmethod
+    def exit_task(args_dict):
+        logging.info("ProcessPoolExecutor's Final Mission complete success!")

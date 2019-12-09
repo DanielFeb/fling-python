@@ -7,7 +7,7 @@ from flask import Flask
 
 from config import logconfig
 from config.base import configuration
-from executor.executor import MultiProcessExecutor
+from executor.executor import MultiProcessExecutor, ProcessPoolExecutor
 from executor.task import Task
 
 logconfig.enable()
@@ -49,8 +49,30 @@ def hello_world():
     return 'Hello World!'
 
 
+@app.route('/pool')
+def pool():
+    current_value = sequence.value
+    sequence.increase()
+
+    name = 'Pool' + str(current_value)
+    greet = 'Hello' + str(current_value)
+    message = "{0}, {1} !".format(greet, name)
+
+    try:
+        pool_executor.add_task(Task(hello, args={
+            "name": name,
+            "greet": greet
+        }, unique_key=name, pre_process=change_args))
+        app.logger.info("Start " + message)
+    except Full:
+        app.logger.warn("Server is busy: " + message)
+        return 'Server is busy!'
+
+    return 'Hello World!'
+
+
 def change_args(task):
-    task.get_args()["greet"] += "123"
+    task.get_args()["greet"] += "-tail"
 
 
 def hello(args_dict):
@@ -70,7 +92,11 @@ if __name__ == '__main__':
     executor = MultiProcessExecutor(configuration.get("executor.queue_size", 0),
                                     configuration.get("executor.concurrent_count", 1),
                                     configuration.get("executor.timeout", 2))
+    pool_executor = ProcessPoolExecutor(configuration.get("executor.queue_size", 0),
+                                        configuration.get("executor.concurrent_count", 1))
 
     executor.start()
+    pool_executor.start()
     app.run()
     executor.stop()
+    pool_executor.stop()

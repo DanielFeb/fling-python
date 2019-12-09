@@ -29,19 +29,20 @@ class SingleThreadExecutor():
         self.task_queue.put(Task(self.exit_task, unique_key="Final-Mission"), block=False)
 
     @staticmethod
-    def exit_task():
+    def exit_task(args_dict):
         logging.info("Executor's Final Mission complete success!")
 
     def execute(self, task):
+        task.pre_process()
         task.run()
 
     @staticmethod
     def do_start(executor):
-        executor.take_tasks(executor)
+        executor.main_loop(executor)
         executor.abandon_tasks(executor)
 
     @staticmethod
-    def take_tasks(executor):
+    def main_loop(executor):
         while executor.is_running:
             task = executor.task_queue.get(block=True)
             executor.execute(task)
@@ -75,7 +76,7 @@ class MultiThreadExecutor(SingleThreadExecutor):
     def do_start(executor):
         threads = []
         for i in range(executor.max_concurrent_count):
-            thread = threading.Thread(target=executor.take_tasks, args=(executor,))
+            thread = threading.Thread(target=executor.main_loop, args=(executor,))
             threads.append(thread)
             thread.start()
 
@@ -92,13 +93,12 @@ class MultiProcessExecutor(MultiThreadExecutor):
 
     def execute(self, task):
         process_name = multiprocessing.current_process().name
-        logging.debug("Process {0} start with task {1}!".format(process_name, task.unique_key))
+        task.pre_process()
         p = Pool(1)
-        res = p.apply_async(task.get_func(), task.get_args())
+        res = p.apply_async(task.get_func(), task.get_argument_tuple())
         p.close()
         try:
             res.get(self._timeout)  # Wait timeout seconds for func to complete.
-            logging.debug("Success! Process {0} exit with task {1}!".format(process_name, task.unique_key))
         except multiprocessing.TimeoutError:
             message = "Timeout! Process {0} exit with task {1}".format(process_name, task.unique_key)
             logging.error(message)

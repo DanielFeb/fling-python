@@ -37,7 +37,10 @@ def hello_world():
     message = "{0}, {1} !".format(greet, name)
 
     try:
-        executor.add_task(Task(hello, args=(name, greet), unique_key=name))
+        executor.add_task(Task(hello, args={
+            "name": name,
+            "greet": greet
+        }, unique_key=name, pre_process=change_args))
         app.logger.info("Start " + message)
     except Full:
         app.logger.warn("Server is busy: " + message)
@@ -46,7 +49,13 @@ def hello_world():
     return 'Hello World!'
 
 
-def hello(name, greet):
+def change_args(task):
+    task.get_args()["greet"] += "123"
+
+
+def hello(args_dict):
+    greet = args_dict["greet"]
+    name = args_dict["name"]
     if random() > 0.5:
         message = "Should timeout {1}!".format(multiprocessing.current_process().name, greet, name)
         app.logger.warn(message)

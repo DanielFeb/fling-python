@@ -37,11 +37,17 @@ class SingleThreadExecutor():
 
     @staticmethod
     def do_start(executor):
+        executor.take_tasks(executor)
+        executor.abandon_tasks(executor)
 
+    @staticmethod
+    def take_tasks(executor):
         while executor.is_running:
             task = executor.task_queue.get(block=True)
             executor.execute(task)
 
+    @staticmethod
+    def abandon_tasks(executor):
         try:
             task = executor.task_queue.get(block=False)
             logging.info("Executor is abandoned with unprocessed tasks!")
@@ -58,15 +64,25 @@ class SingleThreadExecutor():
 class MultiThreadExecutor(SingleThreadExecutor):
     def __init__(self, queue_size=0, max_concurrent_count=1) -> None:
         super().__init__(queue_size)
-        self._semaphore = threading.Semaphore(max_concurrent_count)
+        self.max_concurrent_count = max_concurrent_count
 
-    def execute(self, task):
-        self._semaphore.acquire()
-        self.concurrent_execute(task)
-        self._semaphore.release()
+    def stop(self):
+        self.is_running = False
+        for i in range(self.max_concurrent_count):
+            self.task_queue.put(Task(self.exit_task, unique_key="Final-Mission"), block=False)
 
-    def concurrent_execute(self, task):
-        task.run()
+    @staticmethod
+    def do_start(executor):
+        threads = []
+        for i in range(executor.max_concurrent_count):
+            thread = threading.Thread(target=executor.take_tasks, args=(executor,))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+        executor.abandon_tasks(executor)
 
 
 class MultiProcessExecutor(MultiThreadExecutor):
@@ -74,7 +90,7 @@ class MultiProcessExecutor(MultiThreadExecutor):
         super().__init__(queue_size, max_concurrent_count)
         self._timeout = timeout
 
-    def concurrent_execute(self, task):
+    def execute(self, task):
         process_name = multiprocessing.current_process().name
         logging.debug("Process {0} start with task {1}!".format(process_name, task.unique_key))
         p = Pool(1)

@@ -4,16 +4,13 @@ from random import random
 from time import sleep
 
 from flask import Flask
+
 from config import logconfig
 from config.base import configuration
-from executor.executor import SingleThreadExecutor, MultiProcessExecutor
+from executor.executor import MultiProcessExecutor
 from executor.task import Task
 
 logconfig.enable()
-
-executor = MultiProcessExecutor(configuration.get("executor.queue_size", 0),
-                                configuration.get("executor.concurrent_count", 1),
-                                configuration.get("executor.timeout", 2))
 
 
 class Sequence():
@@ -61,6 +58,10 @@ def hello(name, greet):
 
 
 if __name__ == '__main__':
+    executor = MultiProcessExecutor(configuration.get("executor.queue_size", 0),
+                                    configuration.get("executor.concurrent_count", 1),
+                                    configuration.get("executor.timeout", 2))
+
     executor.start()
     app.run()
     executor.stop()

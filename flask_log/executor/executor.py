@@ -4,6 +4,7 @@ import threading
 from multiprocessing import Pool
 from queue import Empty
 from queue import Queue
+from ilogging import logconfig
 
 from executor.task import Task
 
@@ -118,7 +119,7 @@ class MultiProcessExecutor(MultiThreadExecutor):
 class ProcessPoolExecutor(MultiThreadExecutor):
     def __init__(self, queue_size=0, max_concurrent_count=1) -> None:
         super().__init__(queue_size, max_concurrent_count)
-        self._pool = Pool(max_concurrent_count)
+        self._pool = Pool(max_concurrent_count, initializer=logconfig.enable)
 
     def execute(self, task):
         task.pre_process()

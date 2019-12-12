@@ -17,7 +17,8 @@ def enable():
 
     base.make_dir_if_not_exist(log_dir)
 
-    handlers = ['file']
+    # on windows, use concurrent-log-handler instead
+    handlers = ['concurrent_file']
     if console_enabled:
         handlers.append('wsgi')
 
@@ -37,6 +38,19 @@ def enable():
             'when': when,
             'interval': interval,
             'backupCount': backup_count,
+            'formatter': 'default'
+        }, 'concurrent_file': {
+            'level': log_level,
+            # 如果没有使用并发的日志处理类，在多实例的情况下日志会出现缺失
+            'class': 'cloghandler.ConcurrentRotatingFileHandler',
+            # 当达到10MB时分割日志
+            'maxBytes': 1024 * 1024 * 10,
+            # 最多保留50份文件
+            'backupCount': backup_count,
+            # If delay is true,
+            # then file opening is deferred until the first call to emit().
+            'delay': True,
+            'filename': logfile,
             'formatter': 'default'
         }},
         'root': {

@@ -2,10 +2,10 @@ import multiprocessing
 
 from flask import Flask
 
-from controller.logging import logging_blu
-from controller.test import test_blu
 from executor import executor, pool_executor
 from ilogging import logconfig
+from controller.logging import logging_blu
+from controller.test import test_blu
 
 app = Flask(__name__)
 app.register_blueprint(test_blu, url_prefix="/test")

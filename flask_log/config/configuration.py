@@ -1,6 +1,8 @@
 import json
 import logging
 
+import yaml
+
 
 class Configuration:
     def __init__(self, config_dict) -> None:
@@ -67,8 +69,10 @@ class Configuration:
             return data_2
 
 
-def get_configuration_from_json(json_str):
-    config_dict = json.loads(json_str)
+def get_configuration_from_yaml_file(yaml_file):
+    f = open(yaml_file, "r")
+    config_dict = yaml.load(f, Loader=yaml.FullLoader)
+    f.close()
     return Configuration(config_dict=config_dict)
 
 
@@ -77,4 +81,9 @@ def get_configuration_from_json_file(json_file):
     json_str = file.read()
     file.close()
     return get_configuration_from_json(json_str)
+
+
+def get_configuration_from_json(json_str):
+    config_dict = json.loads(json_str)
+    return Configuration(config_dict=config_dict)
 

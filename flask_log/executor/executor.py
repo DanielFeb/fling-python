@@ -122,6 +122,7 @@ class ProcessPoolExecutor(MultiThreadExecutor):
         self._pool = Pool(max_concurrent_count, initializer=logconfig.enable)
 
     def execute(self, task):
+
         task.pre_process()
         self._pool.apply(task.get_func(), task.get_argument_tuple())
 

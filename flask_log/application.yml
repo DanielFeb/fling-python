@@ -1,0 +1,10 @@
+profiles:
+  active: dev
+log:
+  fileName: flask_log
+  level: DEBUG
+  backupCount: 10
+executor:
+  queueSize: 10
+  concurrentCount: 3
+  timeout: 6

@@ -6,12 +6,12 @@ from config import base
 def enable():
     log_configuration = base.log_configuration()
 
-    filename = log_configuration.get_optional_property_with_default('filename', 'mylog')
-    log_level = log_configuration.get_optional_property_with_default('level', 'DEBUG')
-    when = log_configuration.get_optional_property_with_default('when', 'D')
-    interval = log_configuration.get_optional_property_with_default('interval', 1)
-    backup_count = log_configuration.get_optional_property_with_default('backupCount', 0)
-    console_enabled = log_configuration.get_optional_property_with_default('console.enabled', False)
+    filename = log_configuration.get('fileName', 'mylog')
+    log_level = log_configuration.get('level', 'DEBUG')
+    when = log_configuration.get('when', 'D')
+    interval = log_configuration.get('interval', 1)
+    backup_count = log_configuration.get('backupCount', 0)
+    console_enabled = log_configuration.get('console.enabled', False)
     log_dir = base.add_work_dir_prefix('logs')
     logfile = base.append_path(log_dir, '{0}.log'.format(filename))
 

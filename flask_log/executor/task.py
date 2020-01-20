@@ -3,7 +3,7 @@ def echo(args):
     return args
 
 
-class Task():
+class Task:
     def __init__(self, func, args={}, unique_key="No-Name-Task", pre_process=echo) -> None:
         super().__init__()
         self._func = func
